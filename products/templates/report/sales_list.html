@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="card shadow-sm">
+    <div class="body">
+        <h4 class="p-2">Sales Report</h4>
+        <table class="table table-bordered table-striped table-hover align-middle">
+            <thead class="table-primary">
+                <tr>
+                    <th>Product Name</th>
+                    <th>Available Quantity</th>
+                    <th>Unit Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stocks %}
+                    <tr>
+                        <td>{{ stock.product.name }}</td>
+                        <td>{{ stock.quantity }}</td>
+                        <td>{{ stock.unit_cost }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="table-success">
+                    <th colspan="2" class="text-end">Total Grand Amount:</th>
+                    <th>{{ total_grand }}</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+

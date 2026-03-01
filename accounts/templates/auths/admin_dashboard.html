@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Dashboard Page</h1>
+
+<style>
+.total-purchase-card {
+  background: linear-gradient(135deg, #fff5f5, #ffecec);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 16px;
+}
+
+.total-sales-card {
+  background: linear-gradient(135deg, #f0fff0, #e0ffe0);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 16px;
+}
+
+.total-profit-card {
+  background: linear-gradient(135deg, #e8eef5, #c8dae6);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 16px;
+}
+
+
+.total-due-card {
+  background: linear-gradient(135deg, #fff8e1, #ffecb3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 16px;
+}
+
+.total-due-card:hover,
+.total-profit-card:hover,
+.total-sales-card:hover,
+.total-purchase-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+}
+
+.icon-box {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+}
+</style>
+
+<body class="bg-light">
+<div class="container-fluid p-4">
+  <!-- Cards -->
+  <div class="row g-3 mb-4">
+    <!-- Total Purchase -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-lg h-100 total-purchase-card">
+        <div class="card-body d-flex align-items-center justify-content-between">
+          <div>
+            <h6 class="text-uppercase text-muted mb-1">Total Purchase</h6>
+            <h3 class="fw-bold text-danger mb-0">
+              ৳ {{ total_purchase }}
+            </h3>
+          </div>
+          <div class="icon-box bg-danger text-white">
+            <i class="bi bi-bag-check-fill"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+ {% comment %} <!-------------- Total Sales ----------> {% endcomment %}
+    <div class="col-md-4">
+      <div class="card border-0 shadow-lg h-100 total-sales-card">
+        <div class="card-body d-flex align-items-center justify-content-between">
+          <div>
+            <h6 class="text-uppercase text-muted mb-1">Total Sales</h6>
+            <h3 class="fw-bold text-success mb-0">
+              ৳ {{ total_sales }}
+            </h3>
+          </div>
+          <div class="icon-box bg-success text-white">
+            <i class="bi bi-cart-check"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profit -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-lg h-100 total-profit-card">
+        <div class="card-body d-flex align-items-center justify-content-between">
+          <div>
+            <h6 class="text-uppercase text-muted mb-1">Profit</h6>
+            <h3 class="fw-bold text-primary mb-0">
+              ৳ {{ profit }}
+            </h3>
+          </div>
+          <div class="icon-box bg-primary text-white">
+            <i class="bi bi-cart-check"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+        <!-- This Month Purchase -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-lg h-100 total-purchase-card">
+        <div class="card-body d-flex align-items-center justify-content-between">
+          <div>
+            <h6 class="text-uppercase text-muted mb-1">This Month Purchase</h6>
+            <h3 class="fw-bold text-danger mb-0">
+              ৳ {{ month_purchase }}
+            </h3>
+          </div>
+          <div class="icon-box bg-danger text-white">
+            <i class="bi bi-bag-check-fill"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+            <!-- This Month Sales -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-lg h-100 total-sales-card">
+        <div class="card-body d-flex align-items-center justify-content-between">
+          <div>
+            <h6 class="text-uppercase text-muted mb-1">This Month Sales</h6>
+            <h3 class="fw-bold text-success mb-0">
+              ৳ {{ month_sales }}
+            </h3>
+          </div>
+          <div class="icon-box bg-success text-white">
+            <i class="bi bi-cart-check"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- This Month Sales -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-lg h-100 total-due-card">
+        <div class="card-body d-flex align-items-center justify-content-between">
+          <div>
+            <h6 class="text-uppercase text-muted mb-1">This Month Sales Due</h6>
+            <h3 class="fw-bold text-muted mb-0">
+              ৳ 0
+            </h3>
+          </div>
+          <div class="icon-box bg-warning text-white">
+            <i class="bi bi-currency-dollar"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Today Purchase -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-lg h-100 total-purchase-card">
+        <div class="card-body d-flex align-items-center justify-content-between">
+          <div>
+            <h6 class="text-uppercase text-muted mb-1">Today Purchase</h6>
+            <h3 class="fw-bold text-danger mb-0">
+              ৳ {{ today_purchase }}
+            </h3>
+          </div>
+          <div class="icon-box bg-danger text-white">
+            <i class="bi bi-bag-check-fill"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Today Sales -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-lg h-100 total-sales-card">
+        <div class="card-body d-flex align-items-center justify-content-between">
+          <div>
+            <h6 class="text-uppercase text-muted mb-1">Today Sales</h6>
+            <h3 class="fw-bold text-success mb-0">
+              ৳ {{ today_sales }}
+            </h3>
+          </div>
+          <div class="icon-box bg-success text-white">
+            <i class="bi bi-cart-check"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+      <!-- Today Sales Due -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-lg h-100 total-due-card">
+        <div class="card-body d-flex align-items-center justify-content-between">
+          <div>
+            <h6 class="text-uppercase text-muted mb-1">Today Sales Due</h6>
+            <h3 class="fw-bold text-muted mb-0">
+              ৳ 0
+            </h3>
+          </div>
+          <div class="icon-box bg-warning text-white">
+            <i class="bi bi-currency-dollar"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+
+  </div>
+</div>
+
+
+
+  <!-- Chart -->
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+      <h5 class="mb-3">Monthly Purchase vs Sales</h5>
+      <canvas id="dashboardChart" height="100"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const labels = ['Today', 'This Month'];
+
+const purchaseData = [{{ today_purchase }}, {{ month_purchase }}];
+const salesData = [{{ today_sales }}, {{ month_sales }}];
+
+new Chart(document.getElementById('dashboardChart'), {
+  type: 'bar',
+  data: {
+    labels: labels,
+    datasets: [
+      {
+        label: 'Purchase',
+        data: purchaseData,
+        backgroundColor: 'rgba(255, 99, 132, 0.6)'
+      },
+      {
+        label: 'Sales',
+        data: salesData,
+        backgroundColor: 'rgba(54, 235, 69, 0.6)'
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      y: { beginAtZero: true }
+    }
+  }
+});
+
+</script>
+
+
+{% endblock %}

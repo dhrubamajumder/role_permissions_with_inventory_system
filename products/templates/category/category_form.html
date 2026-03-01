@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card shadow-sm col-md-6 mx-auto">
+    <div class="card-body">
+        <h4 class="mb-3 text-success">
+            {% if is_update %}
+                Category Update
+            {% else %}
+                Add Product
+            {% endif %}
+            
+        </h4>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="text-end">
+                <button type="submit" class="btn btn-success">
+                    {% if is_update %}
+                        Update Category
+                    {% else %}
+                        Submit
+                    {% endif %}
+                    
+                </button>
+                <a href="{% url 'category_list' %}" class="btn btn-secondary"> < Back</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

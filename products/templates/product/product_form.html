@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">{% if form.instance.pk %}Update Product{% else %}Add Product{% endif %}</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <!-- Name -->
+                <div class="mb-3">
+                    <label class="form-label">Product Name</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="text-danger">{{ form.name.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+
+                <!-- Price -->
+                <div class="mb-3">
+                    <label class="form-label">Sales Price</label>
+                    {{ form.sales_price }}
+                    {% if form.sales_price.errors %}
+                        <div class="text-danger">{{ form.sales_price.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Cost Price -->
+                <div class="mb-3">
+                    <label class="form-label" >Purchase Price</label>
+                    {{ form.purchase_price }}
+                    {% if form.purchase_price.errors %}
+                        <div class="text-danger">{{ form.purchase_price.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+
+
+
+                <!-- Submit -->
+                <div class="d-flex justify-content-center gap-2 mt-3">
+                    <button type="submit" class="btn btn-success">
+                        {% if form.instance.pk %}Update Product{% else %}Add Product{% endif %}
+                    </button>
+                    <a href="{% url 'product_list' %}" class="btn btn-secondary"> < Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

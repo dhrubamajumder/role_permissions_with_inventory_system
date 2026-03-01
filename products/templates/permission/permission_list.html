@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+        <div class="alert alert-danger {{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% comment %} <a href="{% url 'permission_create' %}" class="btn btn-primary">+ Add Permissions</a> {% endcomment %}
+
+<h2 class="mb-4 text-primary">Permissions List</h2>
+
+<div class="card shadow-sm">
+    <div class="body">
+        <table class="table table-bordered table-striped table-hover align-middle">
+            <thead class="table-primary">
+                <tr>
+                    <th>ID</th>
+                    <th>Group</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for permission in permissions %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ permission.group }}</td>
+                    <td>{{ permission.name }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">No products found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+{% endblock %}

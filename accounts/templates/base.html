@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory Dashboard</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<style>
+body {
+    overflow-x: hidden;
+    height: 100%;
+}
+
+.sidebar {
+    width: 250px;
+    min-height: 100vh;
+    background: #1c2b36;
+    color: #fff;
+}
+
+
+.sidebar .nav-link {
+    color: #fff;
+}
+
+.sidebar .nav-link:hover {
+    background: #273845;
+}
+
+.sidebar .nav-link .bi {
+    margin-right: 8px;
+}
+
+.layout {
+    min-height: 100vh; 
+}
+
+.rotate-icon {
+    transition: transform 0.3s ease;
+}
+
+a[aria-expanded="true"] .rotate-icon {
+    transform: rotate(180deg);
+}
+
+/* Top Navbar */
+.navbar-custom {
+    background-color: #4f89cc;
+}
+
+/* Main content */
+.main-content {
+    flex-grow: 1;
+    padding: 16px;
+    background: #f8f9fa;
+}
+
+/* Mobile */
+@media (max-width: 991px) {
+    .sidebar {
+        display: none;
+    }
+    .main-content {
+        margin-left: 0;
+        padding-top: 70px;
+    }
+}
+
+</style>
+</head>
+<body>
+
+<!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container-fluid">
+            <!-- Mobile sidebar toggle -->
+            <button class="btn btn-outline-light d-lg-none me-2" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
+                <i class="bi bi-list"></i>
+            </button>
+            <a class="navbar-brand fw-bold" href="#">Inventory System</a>
+            <div class="ms-auto d-flex align-items-center">
+                
+                <a href="{% url 'pending_orders' %}" class="btn btn-default text-white me-2">Pending Orders</a>
+
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button class="btn btn-danger mx-4 ms-4" type="submit" onclick="return confirm('Are you sure to Logout?')">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="layout d-flex">
+<!-- Sidebar (Desktop) -->
+        <div class="sidebar d-none d-lg-block p-1">
+            <div class="text-center mb-4 mt-3">
+                <div> {{ user.username }}<span class="text-success">●</span></div>
+                <p style="opacity: 70%; color: #73a4da;">Welcome: <span style="color: rgb(255, 255, 255);">{{ user.userprofile.role.name }}</span> </p>
+            </div>  
+
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard' %}"><i class="bi bi-house-door"></i> Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'create_order' %}"><i class="bi bi-bag-plus"></i> Collect Order</a>
+                </li>
+            
+                {% with request.resolver_match.url_name as url_name %}
+                <li class="nav-item">
+                    <a class="nav-link d-flex justify-content-between align-items-center {% if url_name in 'purchase_create purchase_list' %}active bg-secondary{% endif %}" data-bs-toggle="collapse" href="#inventoryMenu" aria-expanded="{% if url_name in 'purchase_create purchase_list' %}true{% else %}false{% endif %}">
+
+                        <span><i class="bi bi-box-seam"></i> Product Inventory</span><i class="bi bi-chevron-down rotate-icon"></i></a>
+
+                    <div class="collapse {% if url_name in 'purchase_create purchase_list' %}show{% endif %}" id="inventoryMenu">
+                        <ul class="nav flex-column bg-dark ms-3">
+                            <li><a class="nav-link {% if url_name == 'purchase_create' %}active text-info{% endif %}" href="{% url 'purchase_create' %}"> Purchase </a></li>
+
+                            <li>
+                                <a class="nav-link {% if url_name == 'purchase_list' %}active text-info{% endif %}"
+                                href="{% url 'purchase_list' %}">
+                                    Purchase List
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                {% endwith %}
+                
+
+
+                {% with request.resolver_match.url_name as url_name %}
+                <li class="nav-item">
+                    <a class="nav-link d-flex justify-content-between align-items-center
+                        {% if url_name in 'product_create product_list category_create category_list supplier_create supplier_list system_list' %} active bg-secondary {% endif %}" data-bs-toggle="collapse" href="#accountsMenu" aria-expanded="{% if url_name in 'product_create product_list category_create category_list supplier_create supplier_list stock_list system_list' %}true{% else %}false{% endif %}">
+                        <span><i class="bi bi-gear"></i> Basic Settings</span><i class="bi bi-chevron-down rotate-icon"></i></a>
+
+                    <div class="collapse {% if url_name in 'product_create product_list category_create category_list supplier_create supplier_list system_list' %}show{% endif %}" id="accountsMenu">
+                        <ul class="nav flex-column bg-dark ms-3">
+                            <li><a class="nav-link {% if url_name == 'product_create' %}active text-info{% endif %}" href="{% url 'product_create' %}"> Product Create </a></li>
+                            
+                            <li><a class="nav-link {% if url_name == 'product_list' %}active text-info{% endif %}" href="{% url 'product_list' %}"> Products List </a></li>
+
+                        </ul>
+                    </div>
+                </li>
+                {% endwith %}
+
+                <ul class="nav flex-column bg-dark">
+                    <li>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'stock_list' %}active bg-secondary{% endif %}"
+                        href="{% url 'stock_list' %}">
+                            Stock List
+                        </a>
+                    </li>
+                </ul>
+
+{% comment %} ========================   Users   ============================= {% endcomment %}
+               
+
+            </ul>
+        </div>
+
+
+
+
+
+
+
+        {% comment %} ==================================  Sidebar (Mobile Offcanvas)  ======================================== {% endcomment %}
+          
+<!-- Sidebar (Mobile Offcanvas) -->
+        <div class="offcanvas offcanvas-start bg-dark text-white" id="sidebarOffcanvas">
+            <div class="offcanvas-header">
+                <h5>Inventory System</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+            </div>
+            <div class="offcanvas-body">
+                <ul class="nav flex-column">
+                    <li><a class="nav-link text-white" href="#">Home</a></li>
+                    <li><a class="nav-link text-white" href="{% url 'order_list' %}">Collect Order</a></li>
+
+                    {% comment %} product inventory {% endcomment %}
+                    {% with request.resolver_match.url_name as url_name %}
+                    <li class="nav-item">
+                        <a class="nav-link d-flex justify-content-between align-items-center {% if url_name in 'purchase_create purchase_list' %}active bg-secondary{% endif %}" data-bs-toggle="collapse" href="#inventoryMenu" aria-expanded="{% if url_name in 'purchase_create purchase_list' %}true{% else %}false{% endif %}">
+
+                            <span><i class="bi bi-box-seam"></i> Product Inventory</span><i class="bi bi-chevron-down rotate-icon"></i></a>
+
+                        <div class="collapse {% if url_name in 'purchase_create purchase_list' %}show{% endif %}" id="inventoryMenu">
+                            <ul class="nav flex-column bg-dark ms-3">
+                                <li><a class="nav-link {% if url_name == 'purchase_create' %}active text-info{% endif %}" href="{% url 'purchase_create' %}"> Purchase </a></li>
+
+                                <li>
+                                    <a class="nav-link {% if url_name == 'purchase_list' %}active text-info{% endif %}"
+                                    href="{% url 'purchase_list' %}">
+                                        Purchase List
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    {% endwith %}
+
+                    {% comment %} <---- basic settings ---> {% endcomment %}
+                    {% with request.resolver_match.url_name as url_name %}
+                    <li class="nav-item">
+                        <a class="nav-link d-flex justify-content-between align-items-center
+                            {% if url_name in 'product_create product_list category_create category_list supplier_create supplier_list stock_list system_list' %} active bg-secondary {% endif %}" data-bs-toggle="collapse" href="#accountsMenu" aria-expanded="{% if url_name in 'product_create product_list category_create category_list supplier_create supplier_list stock_list system_list' %}true{% else %}false{% endif %}">
+                            <span><i class="bi bi-gear"></i> Basic Settings</span><i class="bi bi-chevron-down rotate-icon"></i></a>
+
+                        <div class="collapse {% if url_name in 'product_create product_list category_create category_list supplier_create supplier_list stock_list system_list' %}show{% endif %}" id="accountsMenu">
+                            <ul class="nav flex-column bg-dark ms-3">
+                                
+                                <li><a class="nav-link {% if url_name == 'product_create' %}active text-info{% endif %}" href="{% url 'product_create' %}"> Product Create </a></li>
+                                
+                                <li><a class="nav-link {% if url_name == 'product_list' %}active text-info{% endif %}" href="{% url 'product_list' %}"> Products List </a></li>
+
+
+
+                                <li><a class="nav-link {% if url_name == 'stock_list' %}active text-info{% endif %}" href="#"> Low Stock List</a></li>
+
+                            </ul>
+                        </div>
+                    </li>
+                    {% endwith %}
+                    <li><a class="nav-link text-white" href="#">Reports</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex justify-content-between align-items-center
+                        {% if request.resolver_match.url_name in 'user_list role_list permission_list' %}
+                            active
+                        {% endif %}"
+                        data-bs-toggle="collapse"
+                        href="#Menu"
+                        role="button"
+                        aria-expanded="{% if request.resolver_match.url_name in 'user_list role_list permission_list' %}true{% else %}false{% endif %}">
+                            <span><i class="bi bi-people"></i> Users</span>
+                            <i class="bi bi-chevron-down rotate-icon"></i>
+                        </a>
+
+                        <div class="collapse
+                            {% if request.resolver_match.url_name in 'user_list role_list permission_list' %}
+                                show
+                            {% endif %}"
+                            id="Menu">
+
+                            <ul class="nav flex-column bg-dark">
+                                <li>
+                                    <a class="nav-link {% if request.resolver_match.url_name == 'user_list' %}active bg-secondary{% endif %}"
+                                    href="#">
+                                        Users List
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="nav-link {% if request.resolver_match.url_name == 'role_list' %}active bg-secondary{% endif %}"
+                                    href="#">
+                                        Role Assign
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="nav-link {% if request.resolver_match.url_name == 'permission_list' %}active bg-secondary{% endif %}"
+                                    href="#">
+                                        Permissions
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+<!-- Main content -->
+        <div class="main-content pt-4" style="width: 80%;" >
+            {% block content %} {% endblock %}
+        </div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</body>
+</html>

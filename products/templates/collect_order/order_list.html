@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .product-card {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: center;
+        cursor: pointer;
+        background: #f8f9fa;
+    }
+    .product-card:hover {
+        background: #e9ecef;
+    }
+    .product-price {
+        font-weight: bold;
+        font-size: 16px;
+    }
+</style>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<div class="container-fluid mt-3">
+    <div class="row">
+        <!-- LEFT SIDE -->
+        <div class="col-md-8 card shadow-sm p-3">
+            <div class="row g-3" id="product-grid">
+                {% for stock in stocks %}
+                    <div class="col-md-3">
+                        <div class="product-card"
+                             data-id="{{ stock.product.id }}"
+                             data-name="{{ stock.product.name }}"
+                             data-price="{{ stock.product.sales_price }}"
+                             data-stock="{{ stock.quantity }}">
+                            {{ stock.product.name }}
+                            <div class="product-price">{{ stock.product.sales_price }}</div>
+                            <small>Available: {{ stock.quantity }}</small>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    Invoice Summary
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'create_order' %}" id="order-form">
+                        {% csrf_token %}
+                        <div class="mb-2">
+                            <label>Table :</label>
+                            <input type="text" name="table" class="form-control" placeholder="Enter Table" required>
+                        </div>
+
+                        <div class="mb-2">
+                            <label>Order Type :</label>
+                            <select name="order_type" class="form-select">
+                                <option value="heaving">Heaving</option>
+                                <option value="parcel">Parcel</option>
+                            </select>
+                        </div>
+
+                        <table class="table table-bordered table-striped table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Item</th>
+                                    <th>Qty</th>
+                                    <th>Rate</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="order-items"></tbody>
+                        </table>
+
+                        <input type="hidden" name="order_items" id="order-items-input">
+
+                        <div class="mb-2">
+                            <label>Grand Amount</label>
+                            <input type="text" name="grand_total" id="grand-amount" class="form-control" value="0" readonly>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col">
+                                <label>Discount (%)</label>
+                                <input type="number" name="discount" id="discount-amount" class="form-control" value="0" min="0" max="100">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label>Fund</label>
+                                <select name="fund" class="form-select">
+                                    <option value="cash">Cash</option>
+                                    <option value="bkash">Bkash</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <label>Paid Amount</label>
+                                <input type="number" name="paid_amount" class="form-control" value="0">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">Confirm Bill</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const productGrid = document.getElementById('product-grid');
+    const orderTable = document.getElementById('order-items');
+    const grandAmountInput = document.getElementById('grand-amount');
+    const discountInput = document.getElementById('discount-amount');
+
+    function updateGrandTotal() {
+        let total = 0;
+        orderTable.querySelectorAll('tr').forEach(row => {
+            total += parseFloat(row.querySelector('.amount').innerText) || 0;
+        });
+        let discountPercent = parseFloat(discountInput.value) || 0;
+        if(discountPercent < 0) discountPercent = 0;
+        if(discountPercent > 100) discountPercent = 100;
+        grandAmountInput.value = (total * (1 - discountPercent / 100)).toFixed(2);
+    }
+
+    // Add product to order
+    productGrid.addEventListener('click', function(e){
+        const card = e.target.closest('.product-card');
+        if(!card) return;
+        const id = card.dataset.id;
+        const name = card.dataset.name;
+        const price = parseFloat(card.dataset.price);
+        const stock = parseInt(card.dataset.stock);
+
+        let row = orderTable.querySelector(`tr[data-id="${id}"]`);
+
+        if(row){
+            let qtySpan = row.querySelector('.qty');
+            let qty = parseInt(qtySpan.innerText) + 1;
+            if(qty > stock) qty = stock;
+            qtySpan.innerText = qty;
+            row.querySelector('.amount').innerText = (qty * price).toFixed(2);
+        } else {
+            row = document.createElement('tr');
+            row.dataset.id = id;
+            row.dataset.price = price;
+            row.dataset.stock = stock;
+            row.innerHTML = `
+                <td><button type="button" class="btn btn-sm text-danger remove-item">✖</button></td>
+                <td>${name}</td>
+                <td class="qty-cell">
+                    <button type="button" class="btn btn-sm btn-light decrement">−</button>
+                    <span class="qty">1</span>
+                    <button type="button" class="btn btn-sm btn-light increment">+</button>
+                </td>
+                <td>${price.toFixed(2)}</td>
+                <td class="amount">${price.toFixed(2)}</td>
+            `;
+            orderTable.appendChild(row);
+        }
+        updateGrandTotal();
+    });
+
+    document.addEventListener('click', function(e){
+        const row = e.target.closest('tr');
+        if(!row) return;
+
+        if(e.target.classList.contains('increment')){
+            let qty = parseInt(row.querySelector('.qty').innerText) + 1;
+            const stock = parseInt(row.dataset.stock);
+            if(qty > stock) qty = stock;
+            row.querySelector('.qty').innerText = qty;
+            row.querySelector('.amount').innerText = (qty * parseFloat(row.dataset.price)).toFixed(2);
+            updateGrandTotal();
+        }
+
+        if(e.target.classList.contains('decrement')){
+            let qty = parseInt(row.querySelector('.qty').innerText) - 1;
+            if(qty <= 0) {
+                row.remove();
+            } else {
+                row.querySelector('.qty').innerText = qty;
+                row.querySelector('.amount').innerText = (qty * parseFloat(row.dataset.price)).toFixed(2);
+            }
+            updateGrandTotal();
+        }
+
+        if(e.target.classList.contains('remove-item')){
+            row.remove();
+            updateGrandTotal();
+        }
+    });
+
+    discountInput.addEventListener('input', updateGrandTotal);
+
+    // Form submit
+    document.getElementById('order-form').addEventListener('submit', function(e){
+        const orderItems = [];
+        orderTable.querySelectorAll('tr').forEach(row => {
+            orderItems.push({
+                product_id: row.dataset.id,
+                quantity: parseInt(row.querySelector('.qty').innerText),
+                price: parseFloat(row.dataset.price)
+            });
+        });
+        if(orderItems.length === 0){
+            e.preventDefault();
+            alert("Please add at least one product!");
+            return false;
+        }
+        document.getElementById('order-items-input').value = JSON.stringify(orderItems);
+    });
+
+});
+</script>
+{% endblock %}

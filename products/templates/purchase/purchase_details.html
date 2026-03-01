@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="print-area">
+    <div class="card print-card">
+        <!-- Header -->
+        <table style="width:100%; border:none; margin-bottom:10px;">
+            <tr>
+                <td style="text-align:left;" class="p-3">
+                    <h4 class="fw-bold">A4B</h4>
+                    <small>
+                        Shewrapara, Mirpur, Dhaka<br>
+                        Phone: 01810236504 | Email: a4b@gmail.com
+                    </small>
+                </td>
+                <td style="text-align:right;" class="p-3">
+                    <strong>Invoice No:</strong> PUR-{{ purchase.id|stringformat:"05d" }}<br>
+                    <strong>Purchase Date:</strong> {{ purchase.purchase_date|date:"Y-m-d" }}
+                </td>
+            </tr>
+        </table>
+        <hr>
+
+        <!-- From / To Section -->
+        <table style="width:100%; border:none; margin-bottom:20px;">
+            <tr>
+                <td style="vertical-align: top;" class="p-3">
+                    <strong>From</strong><br>
+                    {{ purchase.created_by.username }}<br>
+                    {{ purchase.created_by.email }}<br>
+                </td>
+                <td style="vertical-align: top; text-align:right;" class="p-3">
+                    <strong>To</strong><br>
+                    {{ purchase.supplier.name }}<br>
+                    {% if purchase.supplier.email %}{{ purchase.supplier.email }}<br>{% endif %}
+                    {{ purchase.supplier.phone }}
+                </td>
+            </tr>
+        </table>
+
+        <!-- Purchase Items Table -->
+        <table style="width:100%; border-collapse: collapse;" border="1" class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th style="color: #ffffff; text-align:left;" class="p-3">Product</th>
+                    <th style="color: #ffffff; text-align:right;">Quantity</th>
+                    <th style="color:white; text-align:right;">Purchase Price</th>
+                    <th style="color:white; text-align:right;" class="p-3">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in purchase.items.all %}
+                <tr>
+                    <td class="p-2">{{ item.product.name }}</td>
+                    <td style="padding:5px; text-align:right;">{{ item.quantity }}</td>
+                    <td style="padding:5px; text-align:right;">{{ item.unit_cost }}</td>
+                    
+                    <td style="padding:5px; text-align:right;" class="p-2">{{ item.total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr style="font-weight:bold;" class="p-4">
+                    <td colspan="3" style="text-align:right; padding:5px;">Grand Total</td>
+                    <td style="padding:5px; text-align:right;" class="p-2">{{ purchase.total }}</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <!-- Footer / Buttons -->
+        <div class='m-4' style="margin-top:20px; text-align:right;">
+            <button onclick="window.print()" class="btn btn-primary btn-lg">🖨 Print</button>
+            <a href="{% url 'purchase_list' %}" class="btn btn-success btn-lg">Purchase List</a>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h3 class="mb-4">Sales Report</h3>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>Order ID</th>
+                <th>Table / Customer</th>
+                <th>Date</th>
+                <th>Total Amount</th>
+                <th>Total Profit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for data in report_data %}
+            <tr>
+                <td>{{ data.order.id }}</td>
+                <td>{{ data.order.table }}</td>
+                <td>{{ data.order.created_at|date:"Y-m-d H:i" }}</td>
+                <td>{{ data.total_amount }}</td>
+                <td>{{ data.total_profit }}</td>
+            </tr>
+
+            <!-- Optional: Expand per-order items -->
+            <tr>
+                <td colspan="5">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Unit Price</th>
+                                <th>Amount</th>
+                                <th>Profit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in data.items %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.price }}</td>
+                                <td>{{ item.amount }}</td>
+                                <td>{{ item.profit }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

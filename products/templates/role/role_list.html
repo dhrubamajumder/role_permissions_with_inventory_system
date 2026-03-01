@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-success {{ message.tags }} alert-dismissible fade show">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="text-primary">Role List</h3>
+    </div>
+
+    {% if request.user.is_superuser or 'role_create' in permissions_list %}
+    <a href="{% url 'role_create' %}" class="btn btn-success mb-3">+ Add Role</a>
+    {% endif %}
+
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-hover align-middle text-center">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>#</th>
+                            <th>Role Name</th>
+                            <th>Permissions</th>
+                            {% if request.user.is_superuser %}
+                                <th>Action</th>
+                            {% elif permissions_list and 'role_update' in permissions_list %}
+                                <th>Action</th>
+                            {% elif permissions_list and 'role_delete' in permissions_list %}
+                                <th>Action</th>
+                            {% endif %}
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for role in roles %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ role.name }}</td>
+                            <td>
+                                {% for perm in role.permissions.all %}
+                                <span class="badge bg-primary">{{ perm.name }} </span>
+                                {% empty %}
+                                <span class="text-muted">No permissions</span>
+                                {% endfor %}
+                            </td>
+                            {% if request.user.is_superuser or permissions_list and 'role_update' in permissions_list %}
+                            <td>
+
+                                <a href="{% url 'role_update' role.id %}" class="btn btn-sm btn-primary">Edit</a>
+                                {% endif %}
+
+                                {% if request.user.is_superuser or permissions_list and 'role_delete' in permissions_list %}
+
+                                <form action="{% url 'role_delete' role.id %}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this category?')">Delete</button>
+                                </form>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">No roles found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

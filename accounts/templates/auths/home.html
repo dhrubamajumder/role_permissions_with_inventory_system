@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Dashboard Page</h1>
+
+
+
+</head>
+
+<body class="bg-light">
+
+<div class="container-fluid p-4">
+
+  <!-- Cards -->
+  <div class="row g-3 mb-4">
+
+  <!-- Total Purchase -->
+  <div class="col-md-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h6>Total Purchase</h6>
+        <h3 class="text-danger">৳ {{ total_purchase }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Total Sales -->
+  <div class="col-md-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h6>Total Sales</h6>
+        <h3 class="text-success">৳ {{ total_sales }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profit -->
+  <div class="col-md-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h6>Profit</h6>
+        <h3 class="text-primary">৳ {{ profit }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Today Purchase -->
+  <div class="col-md-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h6>Today Purchase</h6>
+        <h3 class="text-warning">৳ {{ today_purchase }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Today Sales -->
+  <div class="col-md-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h6>Today Sales</h6>
+        <h3 class="text-info">৳ {{ today_sales }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- This Month Purchase -->
+  <div class="col-md-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h6>This Month Purchase</h6>
+        <h3 class="text-danger">৳ {{ month_purchase }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- This Month Sales -->
+  <div class="col-md-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h6>This Month Sales</h6>
+        <h3 class="text-success">৳ {{ month_sales }}</h3>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+  <!-- Chart -->
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+      <h5 class="mb-3">Monthly Purchase vs Sales</h5>
+      <canvas id="dashboardChart" height="100"></canvas>
+    </div>
+  </div>
+
+</div>
+
+</script>
+
+
+
+{% endblock %}

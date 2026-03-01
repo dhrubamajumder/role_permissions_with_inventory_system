@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-body">
+            <h4 class="text-center mb-4">
+                {% if is_update %}Update Purchase{% else %}New Purchase{% endif %}
+            </h4>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Purchase Date</label>
+                        <input type="date" class="form-control" name="purchase_date" value="{{ purchase.purchase_date|default:today }}">
+                    </div>
+                </div>
+
+                <!-- Product Table -->
+                <table class="table table-bordered" id="productTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Product</th>
+                            <th width="100">Qty</th>
+                            <th width="150">Purchase Price</th>
+                            <th width="150">Total</th>
+                            <th width="80"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if items %}
+                            {% for item in items %}
+                            <tr>
+                                <td>
+                                    <select name="product_id[]" class="form-select product">
+                                        <option value="">Select Product</option>
+                                        {% for product in products %}
+                                            <option value="{{ product.id }}"
+                                                    data-price="{{ product.default_price }}"
+                                                    {% if product.id == item.product.id %}selected{% endif %}>
+                                                {{ product.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td><input type="number" name="quantity[]" class="form-control qty" value="{{ item.quantity }}" min="1"></td>
+                                <td><input type="number" name="purchase_price[]" class="form-control price" value="{{ item.purchase_price }}" step="0.01"></td>
+                                <td><input type="number" class="form-control total" value="{{ item.total }}" readonly></td>
+                                <td class="text-center"><button type="button" class="btn btn-danger btn-sm remove">X</button></td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td>
+                                    <select name="product_id[]" class="form-select product">
+                                        <option value="">Select Product</option>
+                                        {% for product in products %}
+                                            <option value="{{ product.id }}" data-price="{{ product.default_price }}">
+                                                {{ product.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td><input type="number" name="quantity[]" class="form-control qty" value="1" min="1"></td>
+                                <td><input type="number" name="purchase_price[]" class="form-control price" value="0" step="0.01"></td>
+                                <td><input type="number" class="form-control total" value="0" readonly></td>
+                                <td class="text-center"><button type="button" class="btn btn-danger btn-sm remove">X</button></td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+
+                <button type="button" id="addRow" class="btn btn-secondary mb-3">+ Add Product</button>
+
+                <!-- Grand Total -->
+                <div class="row mb-3">
+                    <div class="col-md-4 ms-auto">
+                        <label class="form-label fw-bold">Grand Total</label>
+                        <input type="number" id="grandTotal" class="form-control fw-bold" readonly value="0">
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="text-end">
+                    <button type="submit" class="btn btn-success">
+                        {% if is_update %}Update Purchase{% else %}Submit Purchase{% endif %}
+                    </button>
+                    <a href="{% url 'purchase_list' %}" class="btn btn-secondary">&lt; Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculateTotals(){
+    let grand = 0;
+    document.querySelectorAll("#productTable tbody tr").forEach(row=>{
+        let qty = parseFloat(row.querySelector(".qty").value) || 0;
+        let price = parseFloat(row.querySelector(".price").value) || 0;
+        let total = qty * price;
+        row.querySelector(".total").value = total;
+        grand += total;
+    });
+    document.getElementById("grandTotal").value = grand;
+}
+
+// Auto-set price on product change
+document.addEventListener("change", e=>{
+    if(e.target.classList.contains("product")){
+        let row = e.target.closest("tr");
+        let price = parseFloat(e.target.selectedOptions[0].dataset.price) || 0;
+        row.querySelector(".price").value = price;
+        calculateTotals();
+    }
+});
+
+// Recalculate on qty or price input
+document.addEventListener("input", e=>{
+    if(e.target.classList.contains("qty") || e.target.classList.contains("price")){
+        if(e.target.classList.contains("qty") && e.target.value < 1) e.target.value = 1;
+        calculateTotals();
+    }
+});
+
+// Add new row
+document.getElementById("addRow").addEventListener("click", ()=>{
+    let tbody = document.querySelector("#productTable tbody");
+    let row = tbody.querySelector("tr").cloneNode(true);
+    row.querySelectorAll("input").forEach(input=>{
+        input.value = input.classList.contains("qty") ? 1 : 0;
+    });
+    row.querySelector("select").selectedIndex = 0;
+    tbody.appendChild(row);
+    calculateTotals();
+});
+
+// Remove row
+document.addEventListener("click", e=>{
+    if(e.target.classList.contains("remove")){
+        e.target.closest("tr").remove();
+        calculateTotals();
+    }
+});
+
+// Initial calculation
+calculateTotals();
+</script>
+{% endblock %}

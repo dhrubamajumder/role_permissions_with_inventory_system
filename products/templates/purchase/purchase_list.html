@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4 text-primary">Purchase List</h2>
+
+<a href="{% url 'purchase_create' %}" class="btn btn-success mb-3">
+    + Add Purchase
+</a>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <table class="table table-bordered table-striped table-hover align-middle">
+            <thead class="table-primary">
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    {% comment %} <th>Quantity</th> {% endcomment %}
+                    <th>Total</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for purchase in purchases %}
+                <tr>
+                    <!-- Serial -->
+                    <td>{{ forloop.counter }}</td>
+
+                    <td>{{ purchase.purchase_date }}</td>
+                    {% comment %} <td>{{ purchase.items.all|length }}</td> {% endcomment %}
+                    <!-- Total -->
+                    <td>৳ 
+                        {% with total=0 %}
+                        {% for item in purchase.items.all %}
+                            {% with total=total|add:item.quantity|floatformat:2|add:"0" %}
+                            {% endwith %}
+                        {% endfor %}
+                        {{ purchase.total|default:"0.00" }}
+                        {% endwith %}
+                    </td>
+
+                    <!-- Date -->
+
+                    <!-- Actions -->
+                    <td>
+                        <a href="{% url 'purchase_detail' purchase.id %}" class="btn btn-sm btn-info">View</a>
+                        <a href="{% url 'purchase_update' purchase.id %}" class="btn btn-sm btn-warning">Edit</a>
+                        <form action="{% url 'purchase_delete' purchase.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">No purchases found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+            <!-- Grand Total Footer -->
+            <tfoot>
+                <tr class="table-secondary fw-bold">
+                    <td colspan="2" class="text-end">Grand Total:</td>
+                    <td>৳ {{ grand_total|default:"0.00" }}</td>
+                    <td colspan="3"></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+{% endblock %}
